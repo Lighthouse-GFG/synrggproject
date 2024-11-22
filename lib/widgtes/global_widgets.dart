@@ -1,60 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'action_button.dart';
+import 'community_header.dart';
+import 'image_placeholder.dart';
+import 'post_title.dart';
+import 'post_description.dart';
 
 class GlobalWidgets {
-  // Custom App Bar
-  static AppBar customAppBar(String title) {
-    return AppBar(
-      backgroundColor: Colors.black,
-      elevation: 0,
-      title: Text(
-        title,
-        style: GoogleFonts.orbitron(
-          fontSize: 18.sp,
-          color: Colors.cyanAccent,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.notifications, color: Colors.white, size: 22.sp),
-          onPressed: () {
-            // Implement notifications action
-          },
-        ),
-      ],
-    );
-  }
-
-  // Search Bar Widget
-  static Widget searchBar({
-    required Function(String) onSearch,
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-      child: TextField(
-        onChanged: onSearch, // Update search query
-        style: GoogleFonts.poppins(color: Colors.white),
-        decoration: InputDecoration(
-          hintText: 'Search...',
-          hintStyle: GoogleFonts.poppins(color: Colors.white54),
-          filled: true,
-          fillColor: Colors.grey[800],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide.none,
-          ),
-          prefixIcon: Icon(Icons.search, color: Colors.white54),
-        ),
-      ),
-    );
-  }
-
-  // Custom Bottom Navigation Bar
+  /// **Custom Bottom Navigation Bar**
+  /// Dynamic bottom navigation bar with customizable items and behavior.
   static Widget customBottomNavigationBar({
     required int selectedIndex,
     required Function(int) onTap,
+    List<BottomNavigationBarItem>? items,
   }) {
     return BottomNavigationBar(
       currentIndex: selectedIndex,
@@ -63,17 +21,19 @@ class GlobalWidgets {
       selectedItemColor: Colors.cyanAccent,
       unselectedItemColor: Colors.white54,
       type: BottomNavigationBarType.fixed,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
-        BottomNavigationBarItem(icon: Icon(Icons.add), label: ''),
-        BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ''),
-        BottomNavigationBarItem(icon: Icon(Icons.menu), label: ''),
-      ],
+      items: items ??
+          const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
+            BottomNavigationBarItem(icon: Icon(Icons.add), label: ''),
+            BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ''),
+            BottomNavigationBarItem(icon: Icon(Icons.menu), label: ''),
+          ],
     );
   }
 
-  // Post Card Widget
+  /// **Post Card Widget**
+  /// Dynamic post card widget with options for title, description, likes, comments, and more.
   static Widget postCard({
     required String communityName,
     required String postTitle,
@@ -83,138 +43,61 @@ class GlobalWidgets {
     required int comments,
     required VoidCallback onLike,
     required VoidCallback onComment,
+    VoidCallback? onShare,
+    Color? cardColor,
   }) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      margin: EdgeInsets.symmetric(vertical: 1.h, horizontal: 2.w),
       padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: cardColor ?? Colors.grey[900],
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 6,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Community Name
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 3.w,
-                    backgroundColor: Colors.cyanAccent,
-                  ),
-                  SizedBox(width: 3.w),
-                  Text(
-                    communityName,
-                    style: GoogleFonts.poppins(
-                      fontSize: 16.sp,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-              IconButton(
-                icon: Icon(Icons.more_vert, color: Colors.white),
-                onPressed: () {
-                  // More options
-                },
-              ),
-            ],
-          ),
+          CommunityHeader(communityName: communityName),
           SizedBox(height: 1.h),
-
-          // Post Title
-          Text(
-            postTitle,
-            style: GoogleFonts.poppins(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+          if (postTitle.isNotEmpty) PostTitle(postTitle: postTitle),
+          if (!isImagePost && description.isNotEmpty)
+            PostDescription(description: description),
+          if (isImagePost) const ImagePlaceholder(),
+          _actionRow(
+            onLike: onLike,
+            onComment: onComment,
+            onShare: onShare,
+            likes: likes,
+            comments: comments,
           ),
-          if (!isImagePost)
-            Padding(
-              padding: EdgeInsets.only(top: 1.h),
-              child: Text(
-                description,
-                style: GoogleFonts.poppins(
-                  fontSize: 12.sp,
-                  color: Colors.white70,
-                ),
-              ),
-            ),
+        ],
+      ),
+    );
+  }
 
-          // Image for Image Post
-          if (isImagePost)
-            Container(
-              margin: EdgeInsets.only(top: 2.h),
-              height: 20.h,
-              decoration: BoxDecoration(
-                color: Colors.grey[800],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: Icon(Icons.image, color: Colors.white54, size: 12.w),
-              ),
-            ),
-
-          // Post Actions (Like, Comment, Share)
-          Padding(
-            padding: EdgeInsets.only(top: 2.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                // Like Button
-                GestureDetector(
-                  onTap: onLike,
-                  child: Row(
-                    children: [
-                      Icon(Icons.thumb_up_alt_outlined,
-                          color: Colors.white54, size: 18.sp),
-                      SizedBox(width: 1.w),
-                      Text(
-                        likes.toString(),
-                        style: GoogleFonts.poppins(
-                          fontSize: 12.sp,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 4.w),
-
-                // Comment Button
-                GestureDetector(
-                  onTap: onComment,
-                  child: Row(
-                    children: [
-                      Icon(Icons.chat_bubble_outline,
-                          color: Colors.white54, size: 18.sp),
-                      SizedBox(width: 1.w),
-                      Text(
-                        comments.toString(),
-                        style: GoogleFonts.poppins(
-                          fontSize: 12.sp,
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 4.w),
-
-                // Share Button
-                GestureDetector(
-                  onTap: () {
-                    // Add share functionality here
-                  },
-                  child: Icon(Icons.send, color: Colors.white54, size: 18.sp),
-                ),
-              ],
-            ),
-          ),
+  /// **Action Row**
+  static Widget _actionRow({
+    required VoidCallback onLike,
+    required VoidCallback onComment,
+    VoidCallback? onShare,
+    required int likes,
+    required int comments,
+  }) {
+    return Padding(
+      padding: EdgeInsets.only(top: 1.5.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          ActionButton(icon: Icons.thumb_up_alt_outlined, label: likes.toString(), onPressed: onLike),
+          ActionButton(icon: Icons.chat_bubble_outline, label: comments.toString(), onPressed: onComment),
+          if (onShare != null)
+            ActionButton(icon: Icons.send, label: "Share", onPressed: onShare),
         ],
       ),
     );

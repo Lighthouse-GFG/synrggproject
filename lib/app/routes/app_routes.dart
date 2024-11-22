@@ -1,18 +1,19 @@
 import 'package:get/get.dart';
-import 'package:synergee/app/bindings/home_screen_binding.dart';
-import 'package:synergee/app/screens/home.dart';
-import 'package:synergee/app/screens/register.dart';
+import '../bindings/home_screen_binding.dart';
 import '../bindings/login_binding.dart';
 import '../bindings/onboarding_binding.dart';
 import '../bindings/register_binding.dart';
+import '../screens/home.dart';
 import '../screens/login_screen.dart';
 import '../screens/onboarding_screen.dart';
+import '../screens/register.dart';
 
 class AppRoutes {
   static const String ONBOARDING = '/onboarding';
   static const String LOGIN = '/login';
   static const String REGISTER = '/register';
   static const String HOME = '/home';
+
   static List<GetPage> routes = [
     GetPage(
       name: ONBOARDING,
@@ -31,7 +32,7 @@ class AppRoutes {
     ),
     GetPage(
       name: HOME,
-      page: () =>  HomeScreen(),
+      page: () => HomeScreen(),
       binding: HomeScreenBinding(),
     ),
   ];

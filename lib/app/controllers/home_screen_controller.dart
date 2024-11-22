@@ -1,16 +1,32 @@
 import 'package:get/get.dart';
 
 class HomeScreenController extends GetxController {
-  var selectedIndex = 0.obs; // For bottom navigation
-  var searchQuery = ''.obs; // Search query
+  // Observable variables for user information
+  var userAvatarPath = 'assets/user_avatar.png'.obs;
+  var userName = 'Admin'.obs;
+  var userEmail = 'synrgg@gmail.com'.obs;
+
+  // Observable variables for search and posts
+  var isSearchActive = false.obs; // Tracks the visibility of the search bar
+  var searchQuery = ''.obs; // Tracks the current search query
   var posts = <Map<String, dynamic>>[].obs; // Original list of posts
   var filteredPosts = <Map<String, dynamic>>[].obs; // Filtered posts for search
+
+  // Observable variable for bottom navigation
+  var selectedIndex = 0.obs;
+
+  // Observable variable for floating button menu
+  var isFloatingMenuOpen = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-
     // Initialize posts
+    loadPosts();
+    debounce(searchQuery, (_) => filterPosts(), time: const Duration(milliseconds: 300));
+  }
+
+  void loadPosts() {
     posts.assignAll([
       {
         'communityName': 'Valorant Community',
@@ -53,18 +69,22 @@ class HomeScreenController extends GetxController {
         'comments': 25.obs,
       },
     ]);
-
-    // Initialize filtered posts with all posts
     filteredPosts.assignAll(posts);
+  }
 
-    // Update filtered posts whenever search query changes
-    debounce(searchQuery, (_) => filterPosts(), time: Duration(milliseconds: 300));
+  // Toggle search bar visibility
+  void toggleSearchBar() {
+    isSearchActive.toggle();
+    if (!isSearchActive.value) {
+      searchQuery.value = '';
+      filteredPosts.assignAll(posts);
+    }
   }
 
   // Filter posts based on the search query
   void filterPosts() {
     if (searchQuery.isEmpty) {
-      filteredPosts.assignAll(posts); // Reset to all posts
+      filteredPosts.assignAll(posts);
     } else {
       filteredPosts.assignAll(
         posts.where((post) {
@@ -85,14 +105,19 @@ class HomeScreenController extends GetxController {
     }
   }
 
+  // Toggle floating button menu
+  void toggleFloatingMenu() {
+    isFloatingMenuOpen.toggle();
+  }
+
   // Handle Like functionality
   void likePost(int index) {
-    filteredPosts[index]['likes']++; // Increment the likes
+    filteredPosts[index]['likes']++;
   }
 
   // Handle Comment functionality
   void addComment(int index) {
-    filteredPosts[index]['comments']++; // Increment the comments
+    filteredPosts[index]['comments']++;
   }
 
   // Change bottom navigation tab
